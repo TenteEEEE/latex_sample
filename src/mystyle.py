@@ -22,7 +22,6 @@ text = text.replace('。', '．')
 text = text.replace('、', '，')
 
 text = text.replace('にゃーん', 'まだ十分に検討されておらず，今後研究が必要な課題である')
-text = text.replace('最高性', '再構成')
 
 # けものフレンズのじかんだよ！
 text = text.replace('フレンズなんだね！', '関係がある．')
