@@ -20,6 +20,34 @@ text = text.replace('\\]', '\\end{align}')
 
 text = text.replace('。', '．')
 text = text.replace('、', '，')
+
+text = text.replace('にゃーん', 'まだ十分に検討されておらず，今後研究が必要な課題である')
+text = text.replace('最高性', '再構成')
+
+# けものフレンズのじかんだよ！
+text = text.replace('フレンズなんだね！', '関係がある．')
+text = text.replace('なにこれー？', 'まだ知られていない．')
+text = text.replace('フレンズ？', '関係性が確かめられていない．')
+text = text.replace('フレンズ！', '関係性が確かめられた．')
+text = text.replace('をみてみてー！', 'に示す．')
+text = text.replace('すごーい！', '大幅に改善されている．')
+text = text.replace('たのしー！', '非常に興味深い．')
+text = text.replace('えらいね！', '有効であることが確かめられた．')
+text = text.replace('たいへーん！', '課題として挙げられる．')
+text = text.replace('してね！', 'する．')
+text = text.replace('ね！', 'である．')
+text = text.replace('なんだ！', 'である．')
+text = text.replace('んだ！', '．')
+text = text.replace('よ！', '．')
+text = text.replace('よね？', '．')
+text = text.replace('でも，', 'しかし，')
+text = text.replace('いて，', 'おり，')
+text = text.replace('だから，', 'よって，')
+text = text.replace('から，', 'ため，')
+text = text.replace('けど', 'が')
+text = text.replace('ごはん！', '結論である．')
+text = text.replace('としょかん', '参考文献')
+text = text.replace('！', '．')
 ############################################
 
 # convert to tabular environment ###########
@@ -31,29 +59,53 @@ tab_mid = r'\\midrule'
 tab_bottom = r'\\bottomrule'
 tab_firsthead = r'\\endfirsthead'
 tab_caption = r'\\caption.*'
-tab_figure = r'Figure:.*'
-fig_begin = '\\begin{figure}[ht]'
+label_figure = r'Figure:.*'
+label_page = r'Page:.*'
+include_graphic = r'\\includegraphics.*';
+fig_begin = r'\\begin{figure}.*'
 fig_end = '\\end{figure}'
 tab2figure = False
+add_page = False
 for i in range(len(line_text)):
     # print(line_text[i])
     line_text[i] += '\n'
     # detect table to figure
-    if re.match(tab_figure, line_text[i]) is not None:
+    if re.match(label_figure, line_text[i]) is not None:
         tab2figure = True
         caption = '\\caption{' + line_text[i].replace('Figure:', '') + '}'
         caption = caption.replace('\n','')
         line_text[i] = ''
+    # detect number of page
+    if re.match(label_page, line_text[i]) is not None:
+        add_page = True
+        num_page = int(line_text[i].replace('Page:',''));
+        line_text[i] = ''
+    # detect figure begin
+    if re.match(fig_begin, line_text[i]) is not None and add_page:
+        for j in range(i+1, len(line_text)):
+            # detect includegraphic
+            if re.match(include_graphic, line_text[j]) is not None:
+                dir_figure = line_text[j].replace('\\includegraphics[','');
+                line_text[j] = '\\includegraphics[page=' + str(num_page) + ', ' + dir_figure
+                add_page = False        
+                break
     # detect table begin
     if re.match(tab_begin, line_text[i]) is not None:
         if tab2figure:
-            line_text[i] = fig_begin
+            line_text[i] = '\\begin{figure}[ht]'
         for j in range(i+1, len(line_text)):
+            # detect includegraphic
+            if re.match(include_graphic, line_text[j]) is not None:
+                if add_page:
+                    dir_figure = line_text[j].replace('\\includegraphics[','');
+                    line_text[j] = '\\includegraphics[page=' + str(num_page) + ', ' + dir_figure
+                    num_page += 1
             # detect table end
             if re.match(tab_end, line_text[j]) is not None:
                 if tab2figure:
                     line_text[j-1] = caption
                     line_text[j] = fig_end
+                add_page = False
                 break
             # move caption above '\begin{tabular}'
             if re.match(tab_caption, line_text[j]) is not None:

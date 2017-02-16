@@ -17,8 +17,6 @@
 
 ![Sample\label{fig:sample}](./fig/sample.png){width=12cm}
 
-\clearpage
-
 ## 図を横に並べる
 
 Figure:test2
